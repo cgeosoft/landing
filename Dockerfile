@@ -1,14 +1,26 @@
-FROM node as build
+FROM node:20-alpine AS base
 
+ENV PNPM_HOME="/pnpm"
+ENV PATH="$PNPM_HOME:$PATH"
+
+RUN npm install --global corepack@latest
+
+RUN corepack enable
+
+COPY . /app
 WORKDIR /app
 
-COPY package.json package-lock.json ./
 
-RUN npm install
+FROM base AS prod-deps
 
-COPY . .
+RUN --mount=type=cache,id=pnpm,target=/pnpm/store pnpm install --prod --frozen-lockfile
 
-RUN npm run build
+
+FROM base AS build
+
+RUN --mount=type=cache,id=pnpm,target=/pnpm/store pnpm install --frozen-lockfile
+RUN pnpm run build
+
 
 FROM alpine
 

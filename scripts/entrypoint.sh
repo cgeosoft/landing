@@ -15,6 +15,7 @@ done
 if [ -z "$2" ]; then
     echo "No command specified to execute after processing."
 else
-    echo "Executing command: ${@:2}" # This executes from the second argument onwards
-    exec "${@:2}" # Correctly execute the command passed as arguments starting from the second one
+    shift # Remove the first argument (DIST_DIR) so $@ contains only the command
+    echo "Executing command: $@"
+    exec "$@"
 fi
